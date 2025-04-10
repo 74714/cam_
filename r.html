@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> </title>
+
+    <style>
+        #camera,
+        #snapshot,
+        #message {
+            display: none;
+        }
+        
+        #snapshot {
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+        }
+        
+        #message {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+            color: rgb(0, 0, 0);
+        }
+    </style>
+
+</head>
+
+<body>
+    <video id="camera" autoplay></video>
+    <canvas id="snapshot"></canvas>
+    <div id="message"></div>
+
+    <script>
+        const video = document.getElementById('camera');
+        const canvas = document.getElementById('snapshot');
+        const context = canvas.getContext('2d');
+        const message = document.getElementById('message');
+
+        function startCamera() {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                if (videoDevices.length > 0) {
+
+                    navigator.mediaDevices.getUserMedia({
+                        video: true
+                    }).then(stream => {
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+                        video.onplaying = captureSnapshot;
+                    }).catch(err => {
+                        console.error("Error accessing camera: ", err);
+                        message.style.display = 'block';
+                    });
+                } else {
+                    message.textContent = "No camera found!";
+                    message.style.display = 'block';
+                }
+            }).catch(err => {
+                console.error("Error checking devices: ", err);
+                message.textContent = "Unable to access devices!";
+                message.style.display = 'block';
+            });
+        }
+
+        function captureSnapshot() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+            message.textContent = "Gotcha!";
+            message.style.display = 'block';
+        }
+
+        window.onload = startCamera;
+    </script>
+
+</body>
+
+</html>
